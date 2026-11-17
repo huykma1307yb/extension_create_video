@@ -168,6 +168,18 @@ async function flowScene(dataUrl,fname,text,autoGo){
   if(!isVid(mb))return{ok:false,msg:'không tự chuyển được sang chế độ Video (Veo). Hãy chuyển tay 1 lần rồi bấm lại'};
   log.push('đã chuyển sang Veo 9:16');
  }
+ // 0b) đặt số video mỗi lần = x1 (tránh mỗi cảnh ra 2–4 video)
+ mb=modeBtn();
+ if(mb&&/x[2-4]\s*$/.test(lab(mb))){
+  mb.click();await wait(1000);
+  const x1=last(/(^|\s)x1$/);if(x1){x1.click();await wait(800)}
+  document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',code:'Escape',bubbles:true}));
+  document.activeElement?.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',code:'Escape',bubbles:true}));
+  await wait(800);if(last(/(^|\s)video$/)){box()?.click();await wait(600)}
+  mb=modeBtn();
+  if(mb&&/x[2-4]\s*$/.test(lab(mb)))return{ok:false,msg:'Flow đang để tạo nhiều video mỗi lần (x2+). Hãy chỉnh về x1 rồi bấm lại'};
+  log.push('đã chỉnh x1');
+ }
  // 1) tải ảnh lên + gắn vào câu lệnh
  const blob=await (await fetch(dataUrl)).blob();
  const file=new File([blob],fname,{type:blob.type||'image/png'});
@@ -231,21 +243,16 @@ async function flowScene(dataUrl,fname,text,autoGo){
   return [...document.querySelectorAll('button')].filter(b=>vis(b)&&b.getBoundingClientRect().top>er.top-20&&b.getBoundingClientRect().left>er.left+er.width*0.6)
    .sort((a,b)=>b.getBoundingClientRect().right-a.getBoundingClientRect().right||b.getBoundingClientRect().bottom-a.getBoundingClientRect().bottom)[0]};
  const promptEmpty=()=>{const e=box();return (e?.value??e?.textContent??'').trim().length<50};
- const count=()=>tiles().length;
- // Đã gửi = lưới có thêm ô mới HOẶC ô câu lệnh đã trống. Không bấm lại trước 20 giây để tránh tạo trùng.
- for(let t=0;t<15;t++){
-  const n0=count();
+ // Đã gửi = Flow tự xóa ô câu lệnh. Nếu Flow đang bận (giới hạn số video cùng lúc) thì chờ 20 giây rồi bấm lại, tối đa ~10 phút.
+ for(let t=0;t<30;t++){
   const go=findGo();
   if(go&&!go.disabled&&go.getAttribute('aria-disabled')!=='true')go.click();
   for(let k=0;k<20;k++){
    await wait(1000);
-   if(count()>n0||promptEmpty()){
-    if(!promptEmpty()){const e=box();e.focus();if(e.tagName==='TEXTAREA'){Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set.call(e,'');e.dispatchEvent(new Event('input',{bubbles:true}))}else{document.execCommand('selectAll',false,null);document.execCommand('delete')}}
-    log.push('đã gửi'+(t?` (sau ${t} lần thử lại)`:''));return{ok:true,msg:log.join(', ')};
-   }
+   if(promptEmpty()){log.push('đã gửi'+(t?` (sau ${t} lần chờ Flow rảnh)`:''));return{ok:true,msg:log.join(', ')}}
   }
  }
- return{ok:false,msg:log.concat('Flow không nhận lệnh sau 5 phút (có thể hết lượt/tín dụng hoặc đang giới hạn số video cùng lúc)').join(', ')};
+ return{ok:false,msg:log.concat('Flow không nhận lệnh sau 10 phút (có thể hết lượt/tín dụng hoặc đang giới hạn số video cùng lúc)').join(', ')};
 }
 
 // Thu thập thông tin giao diện Flow để gửi cho người hỗ trợ sửa lỗi
