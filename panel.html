@@ -31,12 +31,13 @@ h2{font-size:14px;margin:14px 0 2px}.hint{font-size:12px;color:var(--muted);marg
 <label>Ưu đãi<input id="deal" value="mua 3 tặng 1, freeship đơn từ 2 cái"></label>
 <label>Cách đặt hàng<input id="cta" value="bấm giỏ hàng góc trái"></label>
 <label>Nhân vật<textarea id="char">Vietnamese woman, about 25 years old, oval face, long black hair in a low ponytail, light natural makeup, wearing a dark green warehouse staff polo shirt with a name tag and black work apron</textarea></label>
-<label>Bối cảnh<textarea id="set">a large Vietnamese warehouse with tall stacks of cardboard boxes and a huge pile of caps behind her, bright fluorescent lighting, handwritten red "THANH LÝ XẢ KHO" sign on cardboard</textarea></label>
+<label>Bối cảnh (viết {sp} để tự chèn tên sản phẩm)<textarea id="set">a large Vietnamese warehouse with tall stacks of cardboard boxes and a huge pile of {sp} behind her, bright fluorescent lighting, handwritten red "THANH LÝ XẢ KHO" sign on cardboard</textarea></label>
 </details>
 <details id="auto" open><summary>Tạo video tự động trên Flow</summary>
 <p class="hint">Tạo ảnh trên ChatGPT Plus bằng các prompt ở dưới (360° trước, rồi cảnh 1–5), tải 5 ảnh cảnh về máy, đặt tên canh1…canh5.</p>
 <label>Chọn 5 ảnh cảnh (canh1…canh5)<input id="scenes" type="file" accept="image/*" multiple></label>
 <div id="gal" class="gal"></div>
+<p><button id="clrImg">Xóa ảnh</button></p>
 <label style="display:flex;gap:6px;align-items:center"><input id="autoGo" type="checkbox" checked style="width:auto">Tự bấm nút tạo video trên Flow</label>
 <label style="display:flex;gap:6px;align-items:center">Bắt đầu từ cảnh<input id="startAt" type="number" min="1" max="5" value="1" style="width:60px"></label>
 <p><button class="go" id="runFlow">② Tạo 5 video trên Flow</button> <button id="diag">Chẩn đoán Flow</button></p>

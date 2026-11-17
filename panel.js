@@ -3,12 +3,39 @@ const ids=['name','feat','colors','price0','price1','deal','cta','char','set'];
 const cap=s=>s?s[0].toUpperCase()+s.slice(1):s;
 const short=s=>s.split(',').slice(0,2).join(',').trim();
 
-function data(){const g=i=>$(i).value.trim();return{name:g('name'),feat:g('feat'),colors:g('colors'),p0:g('price0'),p1:g('price1'),deal:g('deal'),cta:g('cta'),ch:g('char'),set:g('set')}}
+function data(){const g=i=>$(i).value.trim();const r={name:g('name'),feat:g('feat'),colors:g('colors'),p0:g('price0'),p1:g('price1'),deal:g('deal'),cta:g('cta')};const k=detect(r.name);r.type=k.t;r.en=k.en
+ const sp=r.en||r.name;r.ch=g('char').replaceAll('{sp}',sp);r.set=g('set').replaceAll('{sp}',sp);return r}
 
-function scenes(d){return[
- {t:'0 to 8 seconds',goal:'Gây chú ý',cam:'medium shot, slow push-in',en:'she spreads her arms toward the huge pile of caps behind her, excited and surprised expression, looking straight into the camera',say:'Trời ơi kho dồn cả ngàn cái mũ nè, hôm nay chị xả hết luôn nha!'},
- {t:'8 to 16 seconds',goal:'Giới thiệu sản phẩm',cam:'close-up on the cap in her hands, then rack focus to her face',en:'she picks up one cap and holds it close to the camera, turning it to show the stitching and logo, smiling',say:`${cap(d.name)} nè, ${short(d.feat)}, đội lên là đẹp liền.`},
- {t:'16 to 24 seconds',goal:'Màu sắc, chất lượng',cam:'medium close-up, slight handheld movement',en:`she lines up caps in several colors (${d.colors}) on a table, then puts one on and adjusts the strap at the back`,say:`Có đủ màu ${d.colors}, khóa sau chỉnh size, ai đội cũng vừa hết trơn.`},
+// Mỗi loại sản phẩm: cách giới thiệu (s2), cách dùng thử (demo), câu khen (p2, p3)
+const TYPES={
+ helmet:{demo:'puts one on her head, fastens the chin strap, then flips the clear visor down and up',show:'knocks lightly on the hard shell and turns it to show the visor and inner padding',p2:'đội vô là an tâm liền',p3:'vỏ cứng cáp, kính trong, lót êm, đội cả ngày không bí'},
+ cap:{demo:'puts one on and adjusts the strap at the back',show:'turns it to show the stitching and logo',p2:'đội lên là đẹp liền',p3:'khóa sau chỉnh size, ai đội cũng vừa'},
+ clothes:{demo:'holds one against her body to show the fit, then stretches the fabric a little toward the camera',show:'rubs the fabric between her fingers and shows the stitching up close',p2:'mặc lên là xinh liền',p3:'vải mềm mát, đường may chắc, mặc thoải mái cả ngày'},
+ shoes:{demo:'puts one pair on, takes a few steps toward the camera, then lifts a foot to show the sole',show:'bends the sole and shows the side profile up close',p2:'mang vô là êm chân liền',p3:'đế êm, chống trơn, mang đi cả ngày không mỏi'},
+ bag:{demo:'hangs one on her shoulder, opens the zipper and shows the compartments inside',show:'shows the zipper, strap and inner lining up close',p2:'đeo lên là sang liền',p3:'nhiều ngăn, khóa kéo êm, đựng được nhiều đồ'},
+ beauty:{demo:'applies a little on the back of her hand and blends it, showing the texture to the camera',show:'opens the cap and shows the texture inside up close',p2:'dùng thử là mê liền',p3:'thấm nhanh, không bết, dùng hằng ngày rất hợp'},
+ home:{demo:'demonstrates using it on the table step by step, showing how easy it is',show:'shows the material and the main parts up close',p2:'nhà nào cũng cần nè',p3:'chắc chắn, dễ dùng, dễ vệ sinh'},
+ tech:{demo:'turns it on and shows it working, pointing at the main features',show:'shows the ports, buttons and finish up close',p2:'xài là sướng liền',p3:'chạy ổn định, pin trâu, dùng bền'},
+ food:{demo:'opens one package, takes a bite and reacts with a delighted expression',show:'shows the package front and the product inside up close',p2:'ăn là ghiền liền',p3:'thơm ngon, đóng gói kỹ, ăn hoài không chán'},
+ other:{demo:'picks one up and demonstrates how it is used',show:'turns it slowly to show its details',p2:'xài là mê liền',p3:'hàng chắc chắn, ai dùng cũng ưng'}
+};
+// Tự nhận loại sản phẩm từ tên tiếng Việt
+const DETECT=[
+ [/bảo hiểm|nón bh|\bbh\b|fullface|3\/4/i,'helmet','motorcycle helmet'],
+ [/lưỡi trai|nón kết|mũ kết|bucket|nón vải|mũ vải/i,'cap','cap'],
+ [/giày|dép|sandal|sneaker|guốc|boot/i,'shoes','pair of shoes'],
+ [/túi|balo|ba lô|ví\b|bóp|cặp/i,'bag','bag'],
+ [/áo|quần|váy|đầm|đồ bộ|đồ ngủ|vớ|tất|khăn/i,'clothes','clothing item'],
+ [/kem|son|serum|sữa rửa|dầu gội|sữa tắm|nước hoa|mỹ phẩm|mặt nạ|toner/i,'beauty','beauty product'],
+ [/tai nghe|loa|sạc|cáp|pin dự phòng|đồng hồ|quạt|đèn|chuột|bàn phím|điện thoại/i,'tech','electronic gadget'],
+ [/nồi|chảo|bát|chén|cốc|kệ|móc|chổi|khay|bình|dao|thớt|gối|chăn|mền|gia dụng/i,'home','household item'],
+ [/bánh|kẹo|snack|(^|\s)khô(\s|$)|mứt|(^|\s)trà|cà phê|hạt|đồ ăn|thực phẩm/i,'food','snack package']
+];
+function detect(n){for(const [re,t,en] of DETECT)if(re.test(n))return{t,en:`${en} (${n})`};return{t:'other',en:n}}
+function scenes(d){const T=TYPES[d.type]||TYPES.other,P=d.en||d.name;return[
+ {t:'0 to 8 seconds',goal:'Gây chú ý',cam:'medium shot, slow push-in',en:`she spreads her arms toward the huge pile of ${P} behind her, excited and surprised expression, looking straight into the camera`,say:'Trời ơi kho dồn cả ngàn món nè, hôm nay chị xả hết luôn nha!'},
+ {t:'8 to 16 seconds',goal:'Giới thiệu sản phẩm',cam:'close-up on the product in her hands, then rack focus to her face',en:`she picks up one ${P}, holds it close to the camera and ${T.show}, smiling`,say:`${cap(d.name)} nè, ${short(d.feat)}, ${T.p2}.`},
+ {t:'16 to 24 seconds',goal:'Màu sắc, chất lượng',cam:'medium close-up, slight handheld movement',en:`she shows several ${P} in different colors (${d.colors}) lined up on a table, then ${T.demo}`,say:`Có đủ màu ${d.colors}, ${T.p3} luôn.`},
  {t:'24 to 32 seconds',goal:'Giá và ưu đãi',cam:'medium shot, quick zoom on the price sign',en:`she holds up a cardboard sign with the old price ${d.p0} crossed out and the new price ${d.p1} written big in red marker, amazed expression`,say:`Giá gốc ${d.p0}, giờ xả kho còn ${d.p1} thôi, ${d.deal} luôn nha!`},
  {t:'32 to 40 seconds',goal:'Kêu gọi chốt đơn',cam:'medium shot, static, she leans toward the camera',en:'she points down toward the bottom corner of the frame, winks and waves goodbye with a big smile',say:`Số lượng có hạn, ${d.cta} chốt liền nha cả nhà ơi!`}
 ]}
@@ -26,8 +53,8 @@ Dưới mỗi góc nhìn là một nhãn chữ tiếng Việt đúng như trên,
 Các góc nhìn được nối với nhau bằng mũi tên nét đứt màu xám theo chiều vòng tròn.
 Mỗi góc nhìn sản phẩm có cùng kích thước, căn giữa ô, góc máy ngang tầm sản phẩm.
 Giữ CHÍNH XÁC màu sắc, logo, chữ in, tem, họa tiết, chất liệu (${d.feat}), đường nét và tỉ lệ thật của sản phẩm. Không thêm, bớt hay bịa chi tiết nào không có trong ảnh gốc. Phần nào không thấy trong ảnh gốc thì suy ra hợp lý, đồng nhất với các mặt còn lại.`,
-  img:S.map((s,i)=>`Vertical 9:16 photorealistic photo, scene ${i+1} of 5. ${d.ch}. Setting: ${d.set}. Action: ${s.en}. The ${d.name} must look exactly like the attached product reference image (same color, logo, stitching and shape). Camera: ${s.cam}. Natural skin texture, sharp focus, realistic commercial TikTok style, no text other than the sign, no watermark.\nUse the attached product image as exact reference. Keep the same woman as the previous scenes.`),
-  veo:S.map((s,i)=>`SCENE ${i+1} — ${s.t}\nVisual/action: ${d.ch}, standing in ${d.set}. ${cap(s.en)}.\nCamera: ${s.cam}, vertical 9:16.\nDialogue (spoken in Vietnamese, exact words): "${s.say}"\nVoice: young Vietnamese woman, Southern Vietnamese accent (Saigon), warm, energetic, natural friendly sales tone, clear pronunciation, lip-sync matches the dialogue.\nAudio: light ambient warehouse sound, no background music.\nStyle: realistic, natural lighting, consistent character with the reference image. No subtitles, no on-screen text, no captions.`),
+  img:S.map((s,i)=>`Vertical 9:16 photorealistic photo, scene ${i+1} of 5. ${d.ch}. Setting: ${d.set}. Action: ${s.en}. The ${d.en||d.name} must look exactly like the attached product reference image (same color, logo, stitching and shape). Camera: ${s.cam}. Natural skin texture, sharp focus, realistic commercial TikTok style, no text other than the sign, no watermark.\nUse the attached product image as exact reference. Keep the same woman as the previous scenes.`),
+  veo:S.map((s,i)=>`SCENE ${i+1} — ${s.t}\nVisual/action: ${d.ch}, standing in ${d.set}. ${cap(s.en)}.\nCamera: ${s.cam}, vertical 9:16.\nDialogue (spoken in Vietnamese, exact words): "${s.say}"\nVoice: young Vietnamese woman, Southern Vietnamese accent (Saigon), warm, energetic, natural friendly sales tone, clear pronunciation, lip-sync matches the dialogue.\nAudio: light ambient warehouse sound, no background music.\nStyle: realistic, natural lighting, consistent character and product with the reference image; the product must look exactly like in the reference image. No subtitles, no on-screen text, no captions.`),
   say:S.map(s=>s.goal+': "'+s.say+'"')
  };
 }
@@ -79,8 +106,8 @@ function render(){
  const s={};ids.forEach(i=>s[i]=$(i).value);chrome.storage.local.set({xk:s});
 }
 
-chrome.storage.local.get('xk',r=>{if(r.xk)ids.forEach(i=>{if(r.xk[i])$(i).value=r.xk[i]});else $('form').open=true;render()});
-ids.forEach(i=>$(i).addEventListener('input',render));
+chrome.storage.local.get('xk',r=>{if(r.xk)ids.forEach(i=>{if(r.xk[i]!==undefined)$(i).value=r.xk[i]});else $('form').open=true;render()});
+ids.forEach(i=>{$(i).addEventListener('input',render);$(i).addEventListener('change',render)});
 
 // ================= TỰ ĐỘNG: ChatGPT (OpenAI API) → Google Flow =================
 const IMG_KEYS=['p360','c1','c2','c3','c4','c5'];
@@ -246,3 +273,7 @@ $('diag').onclick=async()=>{
  try{const [r]=await chrome.scripting.executeScript({target:{tabId:tab.id},func:flowDiag});await navigator.clipboard.writeText(r.result);status('Đã copy thông tin chẩn đoán. Dán gửi cho người hỗ trợ.')}
  catch(e){status('Không chẩn đoán được: '+e.message)}
 };
+
+// Xóa 5 ảnh cảnh đã chọn
+function clearImgs(){imgs={};$('scenes').value='';gallery();chrome.storage.local.remove('xkImgs');$('startAt').value=1}
+$('clrImg').onclick=()=>{clearImgs();status('Đã xóa ảnh.')};
