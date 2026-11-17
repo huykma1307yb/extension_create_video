@@ -1,0 +1,48 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><title>Tạo video AI</title>
+<style>
+:root{--bg:#f3f4f1;--panel:#fff;--fg:#1d221f;--muted:#5f6862;--line:#dfe3dd;--accent:#d6461f;--ink:#fff;--ok:#1f7a4d}
+@media (prefers-color-scheme:dark){:root{--bg:#141715;--panel:#1c201e;--fg:#e8ebe7;--muted:#9aa39d;--line:#2e3431;--accent:#ff6a3d;--ink:#1a0d07;--ok:#5fd39a;color-scheme:dark}}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,sans-serif;padding:12px}
+h1{font-size:20px;margin:0 0 4px}h1 span{color:var(--accent)}
+details{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px;margin:10px 0}
+summary{font-weight:700;cursor:pointer}
+label{display:grid;gap:3px;font-size:12px;font-weight:600;color:var(--muted);margin-top:8px}
+input,textarea{font:14px system-ui;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:7px;width:100%;box-sizing:border-box}
+textarea{min-height:54px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin:8px 0}
+.ch{display:flex;gap:6px;align-items:center;padding:7px 9px;border-bottom:1px solid var(--line)}
+.ch b{flex:1;font-size:13px}
+pre{margin:0;padding:9px;white-space:pre-wrap;word-break:break-word;font:12px/1.5 ui-monospace,monospace;max-height:150px;overflow:auto}
+button{font:600 12px system-ui;border-radius:6px;padding:5px 9px;cursor:pointer;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
+button.go{background:var(--accent);color:var(--ink);border-color:var(--accent)}
+h2{font-size:14px;margin:14px 0 2px}.hint{font-size:12px;color:var(--muted);margin:0}
+.gal{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.gal figure{margin:0;font-size:11px;text-align:center}.gal img{width:100%;border-radius:6px;border:1px solid var(--line);display:block}
+#st{position:sticky;bottom:0;background:var(--fg);color:var(--bg);padding:8px 10px;border-radius:8px;font-size:13px;margin-top:10px}
+#st:empty{display:none}
+</style></head><body>
+<h1>Tạo video <span>AI</span></h1>
+<p class="hint">Mở Google Flow ở tab bên cạnh. Gắn ảnh canhN vào câu lệnh, rồi bấm <b>Dán vào Flow</b> ở SCENE tương ứng.</p>
+<details id="form"><summary>Thông tin sản phẩm</summary>
+<label>Tên sản phẩm<input id="name" value="Mũ lưỡi trai kaki thêu logo"></label>
+<label>Chất liệu / đặc điểm<textarea id="feat">vải kaki cotton dày, form cứng, khóa sau chỉnh size, thêu nổi sắc nét</textarea></label>
+<label>Màu có sẵn<input id="colors" value="đen, trắng, be, xanh navy"></label>
+<div class="row"><label>Giá gốc<input id="price0" value="150k"></label><label>Giá xả<input id="price1" value="49k"></label></div>
+<label>Ưu đãi<input id="deal" value="mua 3 tặng 1, freeship đơn từ 2 cái"></label>
+<label>Cách đặt hàng<input id="cta" value="bấm giỏ hàng góc trái"></label>
+<label>Nhân vật<textarea id="char">Vietnamese woman, about 25 years old, oval face, long black hair in a low ponytail, light natural makeup, wearing a dark green warehouse staff polo shirt with a name tag and black work apron</textarea></label>
+<label>Bối cảnh<textarea id="set">a large Vietnamese warehouse with tall stacks of cardboard boxes and a huge pile of caps behind her, bright fluorescent lighting, handwritten red "THANH LÝ XẢ KHO" sign on cardboard</textarea></label>
+</details>
+<details id="auto" open><summary>Tạo video tự động trên Flow</summary>
+<p class="hint">Tạo ảnh trên ChatGPT Plus bằng các prompt ở dưới (360° trước, rồi cảnh 1–5), tải 5 ảnh cảnh về máy, đặt tên canh1…canh5.</p>
+<label>Chọn 5 ảnh cảnh (canh1…canh5)<input id="scenes" type="file" accept="image/*" multiple></label>
+<div id="gal" class="gal"></div>
+<label style="display:flex;gap:6px;align-items:center"><input id="autoGo" type="checkbox" checked style="width:auto">Tự bấm nút tạo video trên Flow</label>
+<label style="display:flex;gap:6px;align-items:center">Bắt đầu từ cảnh<input id="startAt" type="number" min="1" max="5" value="1" style="width:60px"></label>
+<p><button class="go" id="runFlow">② Tạo 5 video trên Flow</button> <button id="diag">Chẩn đoán Flow</button></p>
+<p class="hint">Trước khi bấm ②: mở dự án Google Flow ở tab đang xem, chọn chế độ tạo video từ ảnh (Frames to Video), tỉ lệ 9:16.</p>
+</details>
+<div id="out"></div>
+<div id="st"></div>
+<script src="panel.js"></script>
+</body></html>
