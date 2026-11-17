@@ -230,12 +230,20 @@ async function flowScene(dataUrl,fname,text,autoGo){
  const findGo=()=>{const e=box();if(!e)return null;const er=e.getBoundingClientRect();
   return [...document.querySelectorAll('button')].filter(b=>vis(b)&&b.getBoundingClientRect().top>er.top-20&&b.getBoundingClientRect().left>er.left+er.width*0.6)
    .sort((a,b)=>b.getBoundingClientRect().right-a.getBoundingClientRect().right||b.getBoundingClientRect().bottom-a.getBoundingClientRect().bottom)[0]};
- const sent=()=>{const e=box();return (e?.value??e?.textContent??'').trim().length<50};
- for(let t=0;t<60;t++){
+ const promptEmpty=()=>{const e=box();return (e?.value??e?.textContent??'').trim().length<50};
+ const count=()=>tiles().length;
+ // Đã gửi = lưới có thêm ô mới HOẶC ô câu lệnh đã trống. Không bấm lại trước 20 giây để tránh tạo trùng.
+ for(let t=0;t<15;t++){
+  const n0=count();
   const go=findGo();
   if(go&&!go.disabled&&go.getAttribute('aria-disabled')!=='true')go.click();
-  await wait(5000);
-  if(sent()){log.push('đã gửi'+(t?` (sau ${t} lần thử lại)`:''));return{ok:true,msg:log.join(', ')}}
+  for(let k=0;k<20;k++){
+   await wait(1000);
+   if(count()>n0||promptEmpty()){
+    if(!promptEmpty()){const e=box();e.focus();if(e.tagName==='TEXTAREA'){Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set.call(e,'');e.dispatchEvent(new Event('input',{bubbles:true}))}else{document.execCommand('selectAll',false,null);document.execCommand('delete')}}
+    log.push('đã gửi'+(t?` (sau ${t} lần thử lại)`:''));return{ok:true,msg:log.join(', ')};
+   }
+  }
  }
  return{ok:false,msg:log.concat('Flow không nhận lệnh sau 5 phút (có thể hết lượt/tín dụng hoặc đang giới hạn số video cùng lúc)').join(', ')};
 }
